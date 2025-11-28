@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Cafeteria</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>📋 Nosso Menu</h1>
+        <button class="btn-voltar" onclick="voltarInicio()">🏠 Início</button>
+    </header>
+
+    <div class="container">
+        <div class="categorias">
+            <button class="btn-categoria ativo" onclick="filtrarCategoria('todos')">Todos</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('Cafés')">Cafés</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('Lanches')">Lanches</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('Doces')">Doces</button>
+        </div>
+
+        <div id="produtos-grid" class="produtos-grid"></div>
+    </div>
+
+    <footer class="footer-menu">
+        <button class="btn-carrinho" onclick="irParaCarrinho()">
+            🛒 Carrinho
+            <span id="badge-carrinho" class="badge">0</span>
+        </button>
+        <button class="btn-finalizar" onclick="irParaFinalizar()">
+            ✅ Finalizar Pedido
+        </button>
+    </footer>
+
+    <script>
+        let produtos = [];
+        let categoriaAtual = 'todos';
+
+        async function carregarProdutos() {
+            const response = await fetch('/api/produtos');
+            produtos = await response.json();
+            renderizarProdutos();
+        }
+
+        function renderizarProdutos() {
+            const grid = document.getElementById('produtos-grid');
+            grid.innerHTML = '';
+
+            const produtosFiltrados = categoriaAtual === 'todos' 
+                ? produtos 
+                : produtos.filter(p => p.categoria === categoriaAtual);
+
+            produtosFiltrados.forEach(produto => {
+                const card = `
+                    <div class="produto-card">
+                        <div class="produto-emoji">${produto.imagem}</div>
+                        <h3>${produto.nome}</h3>
+                        <p class="produto-descricao">${produto.descricao}</p>
+                        <p class="produto-preco">R$ ${produto.preco.toFixed(2)}</p>
+                        <button class="btn-adicionar" onclick="adicionarAoCarrinho(${produto.id})">
+                            + Adicionar
+                        </button>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function filtrarCategoria(categoria) {
+            categoriaAtual = categoria;
+            
+            document.querySelectorAll('.btn-categoria').forEach(btn => {
+                btn.classList.remove('ativo');
+            });
+            event.target.classList.add('ativo');
+            
+            renderizarProdutos();
+        }
+
+        async function adicionarAoCarrinho(produtoId) {
+            const formData = `produtoId=${produtoId}&quantidade=1`;
+            await fetch('/api/adicionar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            
+            atualizarBadgeCarrinho();
+            
+            event.target.textContent = '✓ Adicionado!';
+            event.target.style.backgroundColor = '#27ae60';
+            setTimeout(() => {
+                event.target.textContent = '+ Adicionar';
+                event.target.style.backgroundColor = '';
+            }, 1000);
+        }
+
+        async function atualizarBadgeCarrinho() {
+            const response = await fetch('/api/carrinho');
+            const pedido = await response.json();
+            const totalItens = pedido.itens.reduce((sum, item) => sum + item.quantidade, 0);
+            document.getElementById('badge-carrinho').textContent = totalItens;
+        }
+
+        function voltarInicio() {
+            if (confirm('Deseja cancelar o pedido e voltar ao início?')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function irParaCarrinho() {
+            window.location.href = 'carrinho.html';
+        }
+
+        function irParaFinalizar() {
+            window.location.href = 'finalizar.html';
+        }
+
+        carregarProdutos();
+        atualizarBadgeCarrinho();
+        setInterval(atualizarBadgeCarrinho, 2000);
+    </script>
+</body>
+</html>
