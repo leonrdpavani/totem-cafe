@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - Cafeteria</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="tela-confirmacao">
+    <div class="container-confirmacao">
+        <div class="icone-sucesso">✅</div>
+        <h1>Pedido Realizado com Sucesso!</h1>
+        <p class="mensagem-sucesso">Seu pedido foi confirmado e já está sendo preparado.</p>
+        <p class="mensagem-retirada">Aguarde a chamada para retirar no balcão.</p>
+        
+        <div class="numero-pedido">
+            <span>Número do Pedido:</span>
+            <span class="numero" id="numero-pedido">#000</span>
+        </div>
+
+        <p class="contador">Redirecionando em <span id="contador">5</span> segundos...</p>
+    </div>
+
+    <script>
+        const numeroPedido = Math.floor(Math.random() * 900) + 100;
+        document.getElementById('numero-pedido').textContent = `#${numeroPedido}`;
+
+        let segundos = 5;
+        const intervalo = setInterval(() => {
+            segundos--;
+            document.getElementById('contador').textContent = segundos;
+            
+            if (segundos <= 0) {
+                clearInterval(intervalo);
+                window.location.href = 'index.html';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
