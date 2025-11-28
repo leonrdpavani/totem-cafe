@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Pedido - Cafeteria</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>💳 Finalizar Pedido</h1>
+        <button class="btn-voltar" onclick="voltarCarrinho()">← Voltar ao Carrinho</button>
+    </header>
+    <div class="container">
+        <div class="resumo-pedido">
+            <h2>📝 Resumo do Pedido</h2>
+            <div id="resumo-itens"></div>
+            <div class="resumo-total">
+                <span>Total a Pagar:</span>
+                <span class="valor-destaque" id="total-final">R$ 0,00</span>
+            </div>
+        </div>
+        <div class="forma-pagamento">
+            <h2>💰 Forma de Pagamento</h2>
+            <div class="opcoes-pagamento">
+                <label class="opcao-pagamento">
+                    <input type="radio" name="pagamento" value="Dinheiro" checked>
+                    <div class="opcao-card">
+                        <span class="opcao-icone">💵</span>
+                        <span>Dinheiro</span>
+                    </div>
+                </label>
+                <label class="opcao-pagamento">
+                    <input type="radio" name="pagamento" value="Cartão de Débito">
+                    <div class="opcao-card">
+                        <span class="opcao-icone">💳</span>
+                        <span>Débito</span>
+                    </div>
+                </label>
+                <label class="opcao-pagamento">
+                    <input type="radio" name="pagamento" value="Cartão de Crédito">
+                    <div class="opcao-card">
+                        <span class="opcao-icone">💳</span>
+                        <span>Crédito</span>
+                    </div>
+                </label>
+                <label class="opcao-pagamento">
+                    <input type="radio" name="pagamento" value="PIX">
+                    <div class="opcao-card">
+                        <span class="opcao-icone">📱</span>
+                        <span>PIX</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <button class="btn-pagar" onclick="finalizarPedido()">✅ Confirmar Pagamento</button>
+    </div>
+    <script>
+        async function carregarResumo() {
+            const response = await fetch('/api/carrinho');
+            const pedido = await response.json();
+            if (pedido.itens.length === 0) {
+                alert('Carrinho vazio!');
+                window.location.href = 'menu.html';
+                return;
+            }
+            const resumoDiv = document.getElementById('resumo-itens');
+            resumoDiv.innerHTML = '';
+            pedido.itens.forEach(item => {
+                const itemHtml = '<div class="resumo-item"><span>' + item.quantidade + 'x ' + item.produto.nome + '</span><span>R$ ' + item.subtotal.toFixed(2) + '</span></div>';
+                resumoDiv.innerHTML += itemHtml;
+            });
+            document.getElementById('total-final').textContent = 'R$ ' + pedido.total.toFixed(2);
+        }
+        async function finalizarPedido() {
+            const formaPagamento = document.querySelector('input[name="pagamento"]:checked').value;
+            await fetch('/api/finalizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'formaPagamento=' + formaPagamento
+            });
+            window.location.href = 'confirmacao.html';
+        }
+        function voltarCarrinho() {
+            window.location.href = 'carrinho.html';
+        }
+        carregarResumo();
+    </script>
+</body>
+</html>
