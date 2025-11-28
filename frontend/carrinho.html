@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho - Cafeteria</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>🛒 Seu Carrinho</h1>
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar ao Menu</button>
+    </header>
+
+    <div class="container">
+        <div id="carrinho-lista" class="carrinho-lista"></div>
+        
+        <div class="carrinho-vazio" id="carrinho-vazio" style="display: none;">
+            <p>😕 Seu carrinho está vazio</p>
+            <button class="btn-principal" onclick="voltarMenu()">Ver Produtos</button>
+        </div>
+    </div>
+
+    <footer class="footer-carrinho" id="footer-carrinho">
+        <div class="total-carrinho">
+            <span>Total:</span>
+            <span class="valor-total" id="valor-total">R$ 0,00</span>
+        </div>
+        <button class="btn-finalizar-grande" onclick="irParaFinalizar()">
+            Continuar para Pagamento →
+        </button>
+    </footer>
+
+    <script>
+        async function carregarCarrinho() {
+            const response = await fetch('/api/carrinho');
+            const pedido = await response.json();
+            
+            if (pedido.itens.length === 0) {
+                document.getElementById('carrinho-lista').style.display = 'none';
+                document.getElementById('carrinho-vazio').style.display = 'block';
+                document.getElementById('footer-carrinho').style.display = 'none';
+            } else {
+                renderizarCarrinho(pedido);
+            }
+        }
+
+        function renderizarCarrinho(pedido) {
+            const lista = document.getElementById('carrinho-lista');
+            lista.innerHTML = '';
+
+            pedido.itens.forEach(item => {
+                const itemDiv = `_div class="carrinho-item">
+                        <div class="item-info">
+                            <span class="item-emoji">${item.produto.imagem}</span>
+                            <div class="item-detalhes">
+                                <h3>${item.produto.nome}</h3>
+                                <p class="item-descricao">${item.produto.descricao}</p>
+                                <p class="item-preco">R$ ${item.produto.preco.toFixed(2)} cada</p>
+                            </div>
+                        </div>
+                        <div class="item-quantidade">
+                            <span>Quantidade: ${item.quantidade}</span>
+                            <p class="item-subtotal">Subtotal: R$ ${item.subtotal.toFixed(2)}</p>
+                        </div>
+                        <button class="btn-remover" onclick="removerItem(${item.produto.id})">
+                            🗑️ Remover
+                        </button>
+                    </div>
+                `;
+                lista.innerHTML += itemDiv;
+            });
+
+            document.getElementById('valor-total').textContent = `R$ ${pedido.total.toFixed(2)}`;
+        }
+
+        async function removerItem(produtoId) {
+            await fetch('/api/remover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `produtoId=${produtoId}`
+            });
+            
+            carregarCarrinho();
+        }
+
+        function voltarMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        function irParaFinalizar() {
+            window.location.href = 'finalizar.html';
+        }
+
+        carregarCarrinho();
+    </script>
+</body>
+</html>
