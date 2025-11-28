@@ -1,0 +1,32 @@
+# Maven / Java
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+
+# Build outputs
+/bin/
+/out/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Node (if ever used)
+node_modules/
+npm-debug.log
+
+# Misc
+.settings/
